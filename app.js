@@ -116,6 +116,7 @@ const els = {
   tabs: [...document.querySelectorAll(".tab")],
   tableBody: document.querySelector("#tableBody"),
   cards: document.querySelector("#cardList"),
+  planSection: document.querySelector("#planSection"),
   planSelect: document.querySelector("#planSelect"),
   planBoard: document.querySelector("#planBoard"),
   empty: document.querySelector("#emptyState"),
@@ -130,7 +131,7 @@ const els = {
 let state = {
   tab: "all",
   sort: "recommended",
-  activePlan: "zhijiang",
+  activePlan: "",
 };
 
 let favorites = new Set(JSON.parse(localStorage.getItem("gxVolunteerFavorites") || "[]"));
@@ -889,15 +890,21 @@ function planItem(entry, index) {
 
 function renderPlans() {
   const schemes = buildSchemes();
-  if (!schemes.some((scheme) => scheme.id === state.activePlan)) state.activePlan = schemes[0].id;
-  const active = schemes.find((scheme) => scheme.id === state.activePlan) || schemes[0];
+  if (state.activePlan && !schemes.some((scheme) => scheme.id === state.activePlan)) state.activePlan = "";
   els.planSelect.innerHTML = schemes
-    .map(
-      (scheme) =>
-        `<option value="${escapeHtml(scheme.id)}"${scheme.id === active.id ? " selected" : ""}>${escapeHtml(scheme.tab)}</option>`,
-    )
+    .map((scheme) => `<option value="${escapeHtml(scheme.id)}">${escapeHtml(scheme.tab)}</option>`)
     .join("");
+  els.planSelect.insertAdjacentHTML("afterbegin", `<option value="">不显示方案</option>`);
+  els.planSelect.value = state.activePlan;
 
+  if (!state.activePlan) {
+    els.planSection.hidden = true;
+    els.planBoard.innerHTML = "";
+    return;
+  }
+
+  const active = schemes.find((scheme) => scheme.id === state.activePlan);
+  els.planSection.hidden = false;
   const fallbackCount = active.entries.filter((entry) => isMainUndergradFallback(entry.row)).length;
   const juniorHtml = active.juniors.length
     ? `
@@ -1247,8 +1254,11 @@ function resetFilters() {
     el.checked = true;
   });
   state.sort = "recommended";
+  state.activePlan = "";
   els.sort.value = "recommended";
   els.mobileSort.value = "recommended";
+  els.planSelect.value = "";
+  renderPlans();
   syncRegionTabs();
   setTab("all");
 }
@@ -1288,6 +1298,7 @@ function bind() {
   els.planSelect.addEventListener("change", () => {
     state.activePlan = els.planSelect.value;
     renderPlans();
+    if (state.activePlan && window.matchMedia("(max-width: 900px)").matches) closeFilters();
   });
   document.body.addEventListener("click", (event) => {
     const btn = event.target.closest("[data-fav]");

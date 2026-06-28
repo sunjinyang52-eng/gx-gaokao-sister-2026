@@ -67,6 +67,11 @@
           </select>
         </label>
 
+        <label class="field plan-filter-field">
+          <span>推荐方案</span>
+          <select id="planSelect" aria-label="选择推荐方案"></select>
+        </label>
+
         <fieldset class="check-group chance-group">
           <legend>录取机会</legend>
           <label><input type="checkbox" name="risk" value="冲" checked /> 0-20% 很低</label>
@@ -135,7 +140,7 @@
           <div><span id="safeCount">0</span><small>保底学校</small></div>
         </section>
 
-        <section class="plan-section" aria-label="推荐填报方案">
+        <section class="plan-section" id="planSection" aria-label="推荐填报方案" hidden>
           <div class="plan-head">
             <div>
               <h2>推荐填报方案</h2>
@@ -147,10 +152,6 @@
               <span>手机可看</span>
             </div>
           </div>
-          <label class="plan-picker">
-            <span>方案维度</span>
-            <select id="planSelect" aria-label="选择推荐方案"></select>
-          </label>
           <div class="plan-board" id="planBoard"></div>
         </section>
 

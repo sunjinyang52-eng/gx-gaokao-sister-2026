@@ -218,6 +218,13 @@ button:focus-visible {
   color: var(--green);
 }
 
+.plan-filter-field {
+  padding: 10px;
+  border: 1px solid #c8d9f0;
+  border-radius: 8px;
+  background: #f8fcff;
+}
+
 .check-group input,
 .toggle-line input {
   width: 16px;
