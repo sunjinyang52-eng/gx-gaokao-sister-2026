@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>妹妹的本科志愿筛选器</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header class="app-header">
+      <div class="route-strip" aria-hidden="true"></div>
+      <div class="header-inner">
+        <div>
+          <p class="eyebrow">广西历史类 · 普通本科批 · 非艺术</p>
+          <h1>妹妹的本科志愿筛选器</h1>
+        </div>
+        <div class="candidate">
+          <span><b>414</b> 分</span>
+          <span><b>42,555</b> 位</span>
+          <span>历史 / 政治 / 生物</span>
+        </div>
+      </div>
+    </header>
+
+    <main class="app-shell">
+      <aside class="filters" id="filtersPanel">
+        <div class="filters-head">
+          <h2>筛选</h2>
+          <button class="icon-btn mobile-only" id="closeFilters" type="button" aria-label="关闭筛选">×</button>
+        </div>
+
+        <label class="field">
+          <span>搜索</span>
+          <input id="searchInput" type="search" placeholder="学校 / 专业 / 地区" autocomplete="off" />
+        </label>
+
+        <label class="field">
+          <span>地区</span>
+          <select id="regionSelect">
+            <option value="all">全部</option>
+            <option value="浙江">浙江</option>
+            <option value="广州">广州</option>
+            <option value="广东">广东</option>
+          </select>
+        </label>
+
+        <label class="field">
+          <span>学校性质</span>
+          <select id="natureSelect">
+            <option value="all">全部</option>
+            <option value="公办">公办</option>
+            <option value="民办">民办</option>
+            <option value="中外合作办学">中外合作</option>
+          </select>
+        </label>
+
+        <label class="field">
+          <span>专业方向</span>
+          <select id="directionSelect">
+            <option value="all">全部</option>
+            <option value="计算机数据">计算机数据</option>
+            <option value="互联网商业">互联网商业</option>
+            <option value="传媒内容">传媒内容</option>
+            <option value="财会管理">财会管理</option>
+            <option value="商科管理">商科管理</option>
+            <option value="语言外贸">语言外贸</option>
+          </select>
+        </label>
+
+        <fieldset class="check-group chance-group">
+          <legend>录取机会</legend>
+          <label><input type="checkbox" name="risk" value="冲" checked /> 0-20% 很低</label>
+          <label><input type="checkbox" name="risk" value="小冲" checked /> 20-40% 偏低</label>
+          <label><input type="checkbox" name="risk" value="贴线" checked /> 40-55% 接近</label>
+          <label><input type="checkbox" name="risk" value="较稳" checked /> 55-75% 较高</label>
+          <label><input type="checkbox" name="risk" value="保底" checked /> 75%+ 高</label>
+          <p class="chance-help">按去年最低位次和她 42,555 名的差距粗估，只作筛选参考。强兜底民办=非职业民办且去年最低位次至少比她后 1 万名。</p>
+        </fieldset>
+
+        <label class="field">
+          <span>学费上限</span>
+          <input id="tuitionInput" type="number" min="0" step="1000" placeholder="不限" />
+        </label>
+
+        <label class="toggle-line strong-fallback-toggle">
+          <input id="strongFallbackPrivate" type="checkbox" />
+          <span>只看强兜底民办</span>
+        </label>
+
+        <label class="toggle-line">
+          <input id="favoritesOnly" type="checkbox" />
+          <span>只看收藏</span>
+        </label>
+
+        <label class="toggle-line">
+          <input id="hideVocational" type="checkbox" checked />
+          <span>排除职业本科</span>
+        </label>
+
+        <div class="filter-actions">
+          <button id="resetBtn" type="button">重置</button>
+          <button id="exportBtn" type="button">导出</button>
+        </div>
+      </aside>
+
+      <section class="content">
+        <div class="mobile-toolbar mobile-only">
+          <button id="openFilters" type="button">筛选</button>
+          <select id="mobileSort">
+            <option value="recommended">推荐顺序</option>
+            <option value="safe">更稳优先</option>
+            <option value="near">位次接近</option>
+            <option value="tuition">先稳后低费</option>
+            <option value="plan">先稳后招多</option>
+          </select>
+        </div>
+
+        <nav class="tabs" aria-label="志愿池">
+          <button class="tab active" data-tab="all" type="button">全部</button>
+          <button class="tab" data-tab="zhejiang" type="button">浙江</button>
+          <button class="tab" data-tab="guangdong" type="button">广东</button>
+          <button class="tab" data-tab="private" type="button">民办</button>
+          <button class="tab" data-tab="safe" type="button">机会75%+</button>
+          <button class="tab" data-tab="fallbackPrivate" type="button">保底学校</button>
+          <button class="tab" data-tab="finance" type="button">财务类</button>
+          <button class="tab" data-tab="computer" type="button">计算机/数据</button>
+          <button class="tab" data-tab="internet" type="button">互联网/传媒</button>
+        </nav>
+
+        <section class="summary-grid" aria-label="数据概览">
+          <div><span id="totalCount">0</span><small>可筛选专业</small></div>
+          <div><span id="zjCount">0</span><small>浙江</small></div>
+          <div><span id="gdCount">0</span><small>广东/广州</small></div>
+          <div><span id="publicCount">0</span><small>民办</small></div>
+          <div><span id="safeCount">0</span><small>保底学校</small></div>
+        </section>
+
+        <section class="plan-section" aria-label="推荐填报方案">
+          <div class="plan-head">
+            <div>
+              <h2>推荐填报方案</h2>
+              <p>每套先排10个本科志愿；专科只放在最后做额外保险，不替代本科保底。</p>
+            </div>
+            <div class="plan-head-tags" aria-label="方案规则">
+              <span>本科优先</span>
+              <span>保底单独看</span>
+              <span>手机可看</span>
+            </div>
+          </div>
+          <div class="plan-tabs" id="planTabs" role="tablist" aria-label="方案类型"></div>
+          <div class="plan-board" id="planBoard"></div>
+        </section>
+
+        <div class="table-tools desktop-only">
+          <span id="resultLabel">0 条结果</span>
+          <label>
+            排序
+            <select id="sortSelect">
+              <option value="recommended">推荐顺序</option>
+              <option value="safe">更稳优先</option>
+              <option value="near">位次接近</option>
+              <option value="tuition">先稳后低费</option>
+              <option value="plan">先稳后招多</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="table-wrap desktop-only">
+          <table>
+            <thead>
+              <tr>
+                <th>收藏</th>
+                <th>录取机会</th>
+                <th>推荐分</th>
+                <th>院校</th>
+                <th>专业</th>
+                <th>推荐理由</th>
+                <th>地区/性质</th>
+                <th>2025最低位次</th>
+                <th>专业位次</th>
+                <th>计划</th>
+                <th>学费</th>
+                <th>选科</th>
+              </tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+          </table>
+        </div>
+
+        <div class="cards mobile-only" id="cardList"></div>
+        <p class="empty" id="emptyState" hidden>没有匹配结果</p>
+      </section>
+    </main>
+
+    <div class="overlay" id="overlay" hidden></div>
+
+    <script src="./data.js"></script>
+    <script src="./app.js"></script>
+  </body>
+</html>
