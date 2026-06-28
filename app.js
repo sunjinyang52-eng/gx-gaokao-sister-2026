@@ -116,7 +116,7 @@ const els = {
   tabs: [...document.querySelectorAll(".tab")],
   tableBody: document.querySelector("#tableBody"),
   cards: document.querySelector("#cardList"),
-  planTabs: document.querySelector("#planTabs"),
+  planSelect: document.querySelector("#planSelect"),
   planBoard: document.querySelector("#planBoard"),
   empty: document.querySelector("#emptyState"),
   resultLabel: document.querySelector("#resultLabel"),
@@ -493,6 +493,40 @@ function makePlanSeeds(seeds) {
     .filter(Boolean);
 }
 
+function schoolBundle(school, majors, role, note = "") {
+  const schoolRows = DATA.filter((row) => row.school === school);
+  const selected = majors
+    .map((major) => schoolRows.find((row) => row.major === major) || schoolRows.find((row) => row.major.includes(major)))
+    .filter(Boolean);
+  if (!selected.length) return null;
+  const representative =
+    selected.find((row) => row.major === "汉语言文学") ||
+    selected.find((row) => row.major === "电子商务") ||
+    selected[0];
+  const uniqueMajors = [...new Set(selected.map((row) => row.major))];
+  const totalPlan = selected.reduce((sum, row) => sum + (row.plan || 0), 0);
+  const fees = selected.map((row) => row.tuitionNum).filter(Boolean);
+  const minFee = fees.length ? Math.min(...fees) : null;
+  const maxFee = fees.length ? Math.max(...fees) : null;
+  return {
+    kind: "bundle",
+    row: representative,
+    role,
+    note,
+    majorLabel: `可选专业：${uniqueMajors.join("、")}`,
+    planLabel: `这些专业合计${fmt(totalPlan)}人 / 学费${minFee && maxFee ? `${fmt(minFee)}-${fmt(maxFee)}` : "见表格"}`,
+  };
+}
+
+function zhijiangBundle(role, note = "") {
+  return schoolBundle(
+    "浙江工业大学之江学院",
+    ["汉语言文学", "电子商务", "广告学", "广播电视学", "市场营销", "旅游管理", "酒店管理", "日语", "财务管理", "英语"],
+    role,
+    note || "重点关注学校；绍兴二线，离杭州近；第一学期后就能转专业",
+  );
+}
+
 function isMainUndergradFallback(row) {
   const gap24 = rankGap2024(row);
   return (
@@ -552,14 +586,7 @@ function baseFallbackRows() {
 }
 
 function makeZhijiangPlan() {
-  let entries = makePlanSeeds([
-    ["浙江工业大学之江学院", "汉语言文学", "之江主推", "学校最想去；绍兴二线，离杭州近"],
-    ["浙江工业大学之江学院", "电子商务", "之江主推", "互联网商业方向；第一学期后能转专业"],
-    ["浙江工业大学之江学院", "广告学", "之江主推", "传媒方向；第一学期后能转专业"],
-    ["浙江工业大学之江学院", "广播电视学", "之江主推", "传媒方向；第一学期后能转专业"],
-    ["浙江工业大学之江学院", "市场营销", "之江主推", "商科方向；第一学期后能转专业"],
-    ["浙江工业大学之江学院", "旅游管理", "之江主推", "招生6人；第一学期后能转专业"],
-  ]);
+  let entries = [zhijiangBundle("重点学校", "最想去的学校；专业放一起看，第一学期后能转专业")].filter(Boolean);
   entries = addPlanEntries(
     entries,
     sortByPlanQuality(DATA.filter((row) => row.province === "浙江" && isMainUndergradFallback(row))),
@@ -571,16 +598,17 @@ function makeZhijiangPlan() {
 }
 
 function makeZhejiangPlan() {
-  let entries = makePlanSeeds([
-    ["浙江工业大学之江学院", "汉语言文学", "浙江优先", "绍兴二线，学校重点关注"],
-    ["浙江工业大学之江学院", "电子商务", "浙江优先", "之江重点；第一学期后能转专业"],
+  let entries = [
+    zhijiangBundle("浙江优先", "之江重点；绍兴二线，离杭州近；第一学期后能转专业"),
+    ...makePlanSeeds([
     ["杭州电子科技大学信息工程学院", "工商管理类", "杭州本科保底", "杭州一线，招生9人"],
     ["杭州电子科技大学信息工程学院", "跨境电子商务", "杭州本科保底", "杭州一线，互联网商业方向"],
     ["浙江工商大学杭州商学院", "人力资源管理", "杭州本科保底", "杭州一线，学费相对低"],
     ["浙江农林大学暨阳学院", "电子商务", "绍兴本科保底", "绍兴二线，离杭州近"],
     ["宁波大学科学技术学院", "会计学", "宁波本科保底", "宁波二线，财会方向"],
     ["浙江财经大学东方学院", "会计学", "浙江本科保底", "财经校名更贴财会方向"],
-  ]);
+  ]),
+  ].filter(Boolean);
   entries = addPlanEntries(
     entries,
     sortByPlanQuality(DATA.filter((row) => row.province === "浙江" && isGoodUndergradFallback(row))),
@@ -592,10 +620,9 @@ function makeZhejiangPlan() {
 }
 
 function makeBalancedPlan2() {
-  let entries = makePlanSeeds([
-    ["浙江工业大学之江学院", "汉语言文学", "综合优先", "之江重点，绍兴离杭州近"],
-    ["浙江工业大学之江学院", "电子商务", "综合优先", "之江重点，第一学期后能转专业"],
-    ["浙江工业大学之江学院", "广告学", "综合优先", "传媒方向，第一学期后能转专业"],
+  let entries = [
+    zhijiangBundle("综合优先", "之江重点；专业放一起看，第一学期后能转专业"),
+    ...makePlanSeeds([
     ["杭州电子科技大学信息工程学院", "工商管理类", "浙江本科保底", "杭州一线，招生9人"],
     ["浙江工商大学杭州商学院", "人力资源管理", "浙江本科保底", "杭州一线，学费相对低"],
     ["广州城市理工学院", "会计学", "广东本科保底", "广州一线，招生12人"],
@@ -603,7 +630,8 @@ function makeBalancedPlan2() {
     ["广州新华学院", "汉语言文学", "广东本科保底", "东莞校区，专业接受度高"],
     ["天津财经大学珠江学院", "会计学", "外省本科保底", "财经类民办，学费低"],
     ["湖北经济学院法商学院", "会计学", "外省本科保底", "湖北周边，财会方向"],
-  ]);
+  ]),
+  ].filter(Boolean);
   entries = addPlanEntries(
     entries,
     sortByPlanQuality(baseFallbackRows().filter((row) => row.province !== "广西")),
@@ -832,13 +860,15 @@ function planItem(entry, index) {
   const row = entry.kind === "junior" ? entry : entry.row;
   const chance = planChance(entry);
   const role = entry.role || chance;
+  const majorLabel = entry.majorLabel || row.major;
+  const planLabel = entry.planLabel || `计划${fmt(row.plan)}人 / 学费${row.tuition || "无"}`;
   return `
-    <li class="plan-item ${entry.kind === "junior" ? "junior-plan-item" : ""}">
+    <li class="plan-item ${entry.kind === "junior" ? "junior-plan-item" : ""} ${entry.kind === "bundle" ? "bundle-plan-item" : ""}">
       <div class="plan-index">${String(index + 1).padStart(2, "0")}</div>
       <div class="plan-main">
         <div class="plan-line">
           <b>${escapeHtml(row.school)}</b>
-          <span>${escapeHtml(row.major)}</span>
+          <span>${escapeHtml(majorLabel)}</span>
         </div>
         <div class="plan-meta">
           <span>${escapeHtml(row.province)} / ${escapeHtml(row.nature)}</span>
@@ -851,7 +881,7 @@ function planItem(entry, index) {
         ${role !== chance ? `<span class="plan-role">${escapeHtml(role)}</span>` : ""}
         <span class="plan-chance ${entry.kind === "junior" ? "junior" : ""}">${escapeHtml(chance)}</span>
         <small>${escapeHtml(entryRankLine(entry))}</small>
-        <small>计划${fmt(row.plan)}人 / 学费${escapeHtml(row.tuition || "无")}</small>
+        <small>${escapeHtml(planLabel)}</small>
       </div>
     </li>
   `;
@@ -861,10 +891,10 @@ function renderPlans() {
   const schemes = buildSchemes();
   if (!schemes.some((scheme) => scheme.id === state.activePlan)) state.activePlan = schemes[0].id;
   const active = schemes.find((scheme) => scheme.id === state.activePlan) || schemes[0];
-  els.planTabs.innerHTML = schemes
+  els.planSelect.innerHTML = schemes
     .map(
       (scheme) =>
-        `<button class="plan-tab ${scheme.id === active.id ? "active" : ""}" data-plan="${escapeHtml(scheme.id)}" type="button">${escapeHtml(scheme.tab)}</button>`,
+        `<option value="${escapeHtml(scheme.id)}"${scheme.id === active.id ? " selected" : ""}>${escapeHtml(scheme.tab)}</option>`,
     )
     .join("");
 
@@ -1255,10 +1285,8 @@ function bind() {
   els.openFilters.addEventListener("click", openFilters);
   els.closeFilters.addEventListener("click", closeFilters);
   els.overlay.addEventListener("click", closeFilters);
-  els.planTabs.addEventListener("click", (event) => {
-    const btn = event.target.closest("[data-plan]");
-    if (!btn) return;
-    state.activePlan = btn.dataset.plan;
+  els.planSelect.addEventListener("change", () => {
+    state.activePlan = els.planSelect.value;
     renderPlans();
   });
   document.body.addEventListener("click", (event) => {

@@ -362,26 +362,29 @@ button:hover {
   line-height: 1.2;
 }
 
-.plan-tabs {
-  display: flex;
-  gap: 8px;
-  overflow-x: auto;
+.plan-picker {
+  display: grid;
+  grid-template-columns: 92px minmax(220px, 420px);
+  align-items: center;
+  gap: 10px;
   margin-top: 12px;
-  padding-bottom: 2px;
+  padding: 10px;
+  border: 1px solid #d5deea;
+  border-radius: 8px;
+  background: #f7fafd;
 }
 
-.plan-tab {
-  flex: 0 0 auto;
-  min-height: 36px;
-  border-color: #d5deea;
-  background: #f2f6fb;
-  color: #33445b;
+.plan-picker span {
+  color: #405064;
+  font-size: 13px;
+  font-weight: 800;
 }
 
-.plan-tab.active {
-  border-color: var(--teal);
-  background: var(--teal);
-  color: #ffffff;
+.plan-picker select {
+  min-height: 42px;
+  border-color: #c8d5e5;
+  background: #ffffff;
+  font-weight: 800;
 }
 
 .plan-board {
@@ -535,6 +538,11 @@ button:hover {
 
 .junior-plan-item {
   background: #fffdf8;
+}
+
+.bundle-plan-item {
+  background: #f8fcff;
+  border-color: #c8d9f0;
 }
 
 .table-tools {
@@ -1001,9 +1009,9 @@ td:nth-child(12) {
     min-width: 0;
   }
 
-  .plan-tab {
-    min-height: 36px;
-    padding: 7px 10px;
+  .plan-picker {
+    grid-template-columns: 1fr;
+    gap: 6px;
   }
 
   .plan-item {
